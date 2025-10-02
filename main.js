@@ -1255,6 +1255,10 @@ function paintAtlasBase() {
   canvas.height = height;
   overlay.width = width;
   overlay.height = height;
+  canvas.style.width = `${width}px`;
+  canvas.style.height = `${height}px`;
+  overlay.style.width = `${width}px`;
+  overlay.style.height = `${height}px`;
 
   const atlasCtx = canvas.getContext("2d");
   atlasCtx.imageSmoothingEnabled = false;
@@ -1337,7 +1341,12 @@ function syncAtlasScrollToHighlight() {
   if (!state.rom || state.atlas.renderedTiles === 0) {
     return;
   }
+
   const wrapper = elements.atlasWrapper;
+  if (!wrapper) {
+    return;
+  }
+
   const tileSize = Math.max(1, TILE_SIZE * state.atlas.scale);
   const columns = state.atlas.tilesPerRow;
   const bytesPerTile = getBytesPerTile();
@@ -1349,12 +1358,25 @@ function syncAtlasScrollToHighlight() {
   const padding = Math.max(tileSize * 2, 32);
   const top = wrapper.scrollTop;
   const bottom = top + wrapper.clientHeight;
+  const maxScrollTop = Math.max(0, wrapper.scrollHeight - wrapper.clientHeight);
+
+  if (maxScrollTop <= 0 && top === 0) {
+    return;
+  }
+
+  const needsScrollDown = endY > bottom - padding;
+  const needsScrollUp = startY < top + padding;
+  const highlightOutsideView = endY <= top || startY >= bottom;
+
+  if (atlasInteraction.isUserScroll && !needsScrollDown && !needsScrollUp && !highlightOutsideView) {
+    return;
+  }
 
   let desiredScrollTop = top;
-  if (startY < top + padding) {
-    desiredScrollTop = Math.max(0, startY - padding);
-  } else if (endY > bottom - padding) {
-    desiredScrollTop = Math.max(0, endY - wrapper.clientHeight + padding);
+  if (needsScrollDown) {
+    desiredScrollTop = clamp(endY - wrapper.clientHeight + padding, 0, maxScrollTop);
+  } else if (needsScrollUp) {
+    desiredScrollTop = clamp(startY - padding, 0, maxScrollTop);
   }
 
   if (desiredScrollTop !== top) {
@@ -1411,10 +1433,7 @@ function renderAtlas({ forceRebuild = false } = {}) {
 
   drawAtlasHighlight();
   updateAtlasStatus();
-
-  if (!atlasInteraction.isUserScroll) {
-    syncAtlasScrollToHighlight();
-  }
+  syncAtlasScrollToHighlight();
 }
 
 function requestRender({ forceAtlas = false } = {}) {
@@ -1870,32 +1889,55 @@ function handleAtlasScroll() {
 
 function handleAtlasWheel(event) {
   if (!state.rom) return;
-  event.preventDefault();
-  event.stopPropagation();
 
-  const wrapper = elements.atlasWrapper;
   const deltaPixels = getWheelDeltaPixels(event);
   if (deltaPixels === 0) {
     return;
   }
 
+  const wrapper = elements.atlasWrapper;
   const tileSize = Math.max(1, TILE_SIZE * state.atlas.scale);
-  const rowsDelta = deltaPixels / tileSize;
-  const accumulatedRows = atlasInteraction.wheelRowAccumulator + rowsDelta;
-  const wholeRows = accumulatedRows > 0 ? Math.floor(accumulatedRows) : Math.ceil(accumulatedRows);
-  atlasInteraction.wheelRowAccumulator = accumulatedRows - wholeRows;
+  if (tileSize <= 0) {
+    return;
+  }
 
+  const previousScrollTop = wrapper.scrollTop;
+  let scrollChanged = false;
   if (wrapper.scrollHeight > wrapper.clientHeight) {
     const maxScroll = Math.max(0, wrapper.scrollHeight - wrapper.clientHeight);
-    const target = clamp(wrapper.scrollTop + deltaPixels, 0, maxScroll);
-    if (target !== wrapper.scrollTop) {
+    const target = clamp(previousScrollTop + deltaPixels, 0, maxScroll);
+    if (target !== previousScrollTop) {
       wrapper.scrollTop = target;
+      scrollChanged = true;
     }
   }
 
+  const previousAccumulator = atlasInteraction.wheelRowAccumulator;
+  let accumulator = previousAccumulator + deltaPixels / tileSize;
+  const wholeRows = accumulator > 0 ? Math.floor(accumulator) : Math.ceil(accumulator);
+
+  let offsetChanged = false;
   if (wholeRows !== 0) {
-    const deltaTiles = wholeRows * state.atlas.tilesPerRow;
-    adjustOffset(deltaTiles);
+    const previousOffset = state.offset;
+    adjustOffset(wholeRows * state.atlas.tilesPerRow);
+    offsetChanged = state.offset !== previousOffset;
+    if (offsetChanged) {
+      accumulator -= wholeRows;
+    } else {
+      accumulator = previousAccumulator;
+    }
+  }
+
+  const consumed = scrollChanged || offsetChanged;
+
+  if (consumed) {
+    atlasInteraction.wheelRowAccumulator = accumulator;
+    event.preventDefault();
+    event.stopPropagation();
+  } else if (wholeRows === 0) {
+    atlasInteraction.wheelRowAccumulator = accumulator;
+  } else {
+    atlasInteraction.wheelRowAccumulator = 0;
   }
 }
 
