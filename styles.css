@@ -327,7 +327,6 @@ section.viewer {
 .palette-section summary::after,
 .editor-summary::after,
 .atlas-panel summary::after {
-  content: "⌃";
   transition: transform 0.2s ease;
   font-size: 0.9rem;
   color: #7d8fb6;

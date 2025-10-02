@@ -90,27 +90,25 @@
     <section class="viewer" aria-label="Tile viewer">
       <div class="viewer-layout">
         <aside class="palette-pane pane" id="palette-pane" aria-label="Palette controls">
-          <details class="palette-section" open>
-            <summary>Palettes</summary>
-            <p class="palette-hint" id="palette-hint-text">Click a strip to activate it. Color 0 is treated as transparent.</p>
-            <div class="palette-toolbar">
-              <div class="palette-toolbar-group">
-                <button type="button" id="export-palette-json-btn" disabled>Export JSON</button>
-                <button type="button" id="export-palette-raw-btn" disabled>Export console format</button>
-              </div>
-              <div class="palette-toolbar-group">
-                <label class="import-palette-label">
-                  <span class="import-label-text" id="import-palette-json-label-text">Import JSON</span>
-                  <input type="file" id="import-palette-json-input" accept="application/json" />
-                </label>
-                <label class="import-palette-label">
-                  <span class="import-label-text" id="import-palette-raw-label-text">Import console format</span>
-                  <input type="file" id="import-palette-raw-input" accept="application/octet-stream,.bin,.pal,.dat" />
-                </label>
-              </div>
+          <summary>Palettes</summary>
+          <p class="palette-hint" id="palette-hint-text">Click a strip to activate it. Color 0 is treated as transparent.</p>
+          <div class="palette-toolbar">
+            <div class="palette-toolbar-group">
+              <button type="button" id="export-palette-json-btn" disabled>Export JSON</button>
+              <button type="button" id="export-palette-raw-btn" disabled>Export console format</button>
             </div>
-            <div class="palette-editor" id="palette-editor"></div>
-          </details>
+            <div class="palette-toolbar-group">
+              <label class="import-palette-label">
+                <span class="import-label-text" id="import-palette-json-label-text">Import JSON</span>
+                <input type="file" id="import-palette-json-input" accept="application/json" />
+              </label>
+              <label class="import-palette-label">
+                <span class="import-label-text" id="import-palette-raw-label-text">Import console format</span>
+                <input type="file" id="import-palette-raw-input" accept="application/octet-stream,.bin,.pal,.dat" />
+              </label>
+            </div>
+          </div>
+          <div class="palette-editor" id="palette-editor"></div>
         </aside>
 
         <div class="primary-view pane" aria-label="Tile canvas">
@@ -121,28 +119,26 @@
         </div>
 
         <aside class="editor-pane pane" id="editor-pane" aria-label="Tile editor">
-          <details class="editor-panel" open>
-            <summary class="editor-summary">
-              <span>Tile editor</span>
-              <span class="editor-summary-meta" id="editor-summary-meta">No tile selected</span>
-            </summary>
-            <div class="editor-content">
-              <div class="editor-canvas-wrapper">
-                <canvas id="tile-editor" width="256" height="256"></canvas>
+          <summary class="editor-summary">
+            <span>Tile editor</span>
+            <span class="editor-summary-meta" id="editor-summary-meta">No tile selected</span>
+          </summary>
+          <div class="editor-content">
+            <div class="editor-canvas-wrapper">
+              <canvas id="tile-editor" width="256" height="256"></canvas>
+            </div>
+            <div class="editor-controls">
+              <div class="editor-palette" id="editor-palette"></div>
+              <div class="editor-actions">
+                <button type="button" id="fill-tile-btn" disabled>Fill tile</button>
+                <button type="button" id="clear-tile-btn" disabled>Clear tile</button>
               </div>
-              <div class="editor-controls">
-                <div class="editor-palette" id="editor-palette"></div>
-                <div class="editor-actions">
-                  <button type="button" id="fill-tile-btn" disabled>Fill tile</button>
-                  <button type="button" id="clear-tile-btn" disabled>Clear tile</button>
-                </div>
-                <div class="editor-clipboard">
-                  <button type="button" id="copy-tile-btn" disabled>Copy tile</button>
-                  <button type="button" id="paste-tile-btn" disabled>Paste tile</button>
-                </div>
+              <div class="editor-clipboard">
+                <button type="button" id="copy-tile-btn" disabled>Copy tile</button>
+                <button type="button" id="paste-tile-btn" disabled>Paste tile</button>
               </div>
             </div>
-          </details>
+          </div>
         </aside>
 
         <aside class="atlas-panel pane" aria-label="Mini atlas navigation">
