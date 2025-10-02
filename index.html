@@ -1,0 +1,99 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VibeViewer</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <h1>VibeViewer</h1>
+    <p class="tagline">Drop in a ROM and browse its tiles.</p>
+  </header>
+
+  <main class="app">
+    <section class="controls" aria-label="Viewer controls">
+      <div class="file-loader" id="file-loader">
+        <label class="file-label" for="rom-input">Choose or drop a ROM</label>
+        <input type="file" id="rom-input" accept=".bin,.chr,.nes,.sfc,.smc,.rom" />
+        <p class="file-status" id="file-status">No file loaded</p>
+      </div>
+
+      <fieldset>
+        <legend>Format</legend>
+        <label>
+          <input type="radio" name="format" value="nes" checked />
+          NES 2bpp
+        </label>
+        <label>
+          <input type="radio" name="format" value="snes" />
+          SNES 4bpp
+        </label>
+      </fieldset>
+
+      <label>
+        Start offset
+        <input type="text" id="offset-input" value="0x0" />
+      </label>
+
+      <label>
+        Tiles to show
+        <input type="number" id="tile-count-input" value="512" min="1" step="1" />
+      </label>
+
+      <label>
+        Tiles per row
+        <input type="number" id="tiles-per-row-input" value="16" min="1" max="64" />
+      </label>
+
+      <label>
+        Zoom
+        <input type="range" id="zoom-input" min="1" max="10" step="1" value="4" />
+        <span id="zoom-value">4x</span>
+      </label>
+
+      <label>
+        Byte alignment
+        <input type="range" id="alignment-input" min="0" max="15" step="1" value="0" />
+        <span id="alignment-value">0</span>
+      </label>
+
+      <details open>
+        <summary>Palette</summary>
+        <div class="palette-set-switch" id="palette-set-switch"></div>
+        <div id="palette-editor"></div>
+      </details>
+
+      <button type="button" id="export-png-btn" disabled>Export view as PNG</button>
+    </section>
+
+    <section class="viewer" aria-label="Tile viewer">
+      <div class="viewer-panels">
+        <div class="primary-view">
+          <div class="canvas-wrapper">
+            <canvas id="tile-canvas" width="512" height="512"></canvas>
+          </div>
+          <p class="status" id="tile-status">Load a ROM to begin.</p>
+        </div>
+        <aside class="atlas-panel" aria-label="Mini atlas navigation">
+          <h2 class="atlas-title">Mini atlas</h2>
+          <div class="atlas-wrapper">
+            <div class="atlas-canvas-stack">
+              <canvas id="atlas-canvas" width="256" height="256"></canvas>
+              <canvas id="atlas-overlay" width="256" height="256"></canvas>
+            </div>
+          </div>
+          <p class="status" id="atlas-status">Load a ROM to enable atlas navigation.</p>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <small>Supports NES 2bpp and SNES 4bpp tile data. Use arrow keys to step tiles.</small>
+  </footer>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
