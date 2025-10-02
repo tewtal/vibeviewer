@@ -7,13 +7,11 @@
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
-  <header class="app-header">
-    <h1>VibeViewer</h1>
-    <p class="tagline">Drop in a ROM and browse its tiles.</p>
-  </header>
-
   <main class="app">
     <section class="controls" aria-label="Viewer controls">
+      <div class="app-title" aria-label="Application title">
+        <h1>VibeViewer</h1>
+      </div>
       <div class="file-loader" id="file-loader">
         <label class="file-label" for="rom-input">Choose or drop a ROM</label>
         <input type="file" id="rom-input" accept=".bin,.chr,.nes,.sfc,.smc,.rom" />
@@ -25,6 +23,10 @@
         <label>
           <input type="radio" name="format" value="nes" checked />
           NES 2bpp
+        </label>
+        <label>
+          <input type="radio" name="format" value="snes2bpp" />
+          SNES/GB 2bpp
         </label>
         <label>
           <input type="radio" name="format" value="snes" />
@@ -48,6 +50,16 @@
       </label>
 
       <label>
+        Layout
+        <select id="tile-layout-select">
+          <option value="single">8×8 tiles</option>
+          <option value="vertical">8×16 (stacked)</option>
+          <option value="horizontal">16×8 (side-by-side)</option>
+          <option value="quad">16×16 (2×2)</option>
+        </select>
+      </label>
+
+      <label>
         Zoom
         <input type="range" id="zoom-input" min="1" max="10" step="1" value="4" />
         <span id="zoom-value">4x</span>
@@ -59,24 +71,81 @@
         <span id="alignment-value">0</span>
       </label>
 
-      <details open>
-        <summary>Palette</summary>
-        <div class="palette-set-switch" id="palette-set-switch"></div>
-        <div id="palette-editor"></div>
-      </details>
+      <fieldset class="pane-toggles">
+        <legend>Workspace panes</legend>
+        <label class="toggle-option">
+          <input type="checkbox" id="toggle-palette-pane" checked />
+          Show palette pane
+        </label>
+        <label class="toggle-option">
+          <input type="checkbox" id="toggle-editor-pane" checked />
+          Show tile editor
+        </label>
+      </fieldset>
 
       <button type="button" id="export-png-btn" disabled>Export view as PNG</button>
+      <button type="button" id="save-rom-btn" disabled>Save edited ROM</button>
     </section>
 
     <section class="viewer" aria-label="Tile viewer">
-      <div class="viewer-panels">
-        <div class="primary-view">
+      <div class="viewer-layout">
+        <aside class="palette-pane pane" id="palette-pane" aria-label="Palette controls">
+          <details class="palette-section" open>
+            <summary>Palettes</summary>
+            <p class="palette-hint" id="palette-hint-text">Click a strip to activate it. Color 0 is treated as transparent.</p>
+            <div class="palette-toolbar">
+              <div class="palette-toolbar-group">
+                <button type="button" id="export-palette-json-btn" disabled>Export JSON</button>
+                <button type="button" id="export-palette-raw-btn" disabled>Export console format</button>
+              </div>
+              <div class="palette-toolbar-group">
+                <label class="import-palette-label">
+                  <span class="import-label-text" id="import-palette-json-label-text">Import JSON</span>
+                  <input type="file" id="import-palette-json-input" accept="application/json" />
+                </label>
+                <label class="import-palette-label">
+                  <span class="import-label-text" id="import-palette-raw-label-text">Import console format</span>
+                  <input type="file" id="import-palette-raw-input" accept="application/octet-stream,.bin,.pal,.dat" />
+                </label>
+              </div>
+            </div>
+            <div class="palette-editor" id="palette-editor"></div>
+          </details>
+        </aside>
+
+        <div class="primary-view pane" aria-label="Tile canvas">
           <div class="canvas-wrapper">
             <canvas id="tile-canvas" width="512" height="512"></canvas>
           </div>
           <p class="status" id="tile-status">Load a ROM to begin.</p>
         </div>
-        <aside class="atlas-panel" aria-label="Mini atlas navigation">
+
+        <aside class="editor-pane pane" id="editor-pane" aria-label="Tile editor">
+          <details class="editor-panel" open>
+            <summary class="editor-summary">
+              <span>Tile editor</span>
+              <span class="editor-summary-meta" id="editor-summary-meta">No tile selected</span>
+            </summary>
+            <div class="editor-content">
+              <div class="editor-canvas-wrapper">
+                <canvas id="tile-editor" width="256" height="256"></canvas>
+              </div>
+              <div class="editor-controls">
+                <div class="editor-palette" id="editor-palette"></div>
+                <div class="editor-actions">
+                  <button type="button" id="fill-tile-btn" disabled>Fill tile</button>
+                  <button type="button" id="clear-tile-btn" disabled>Clear tile</button>
+                </div>
+                <div class="editor-clipboard">
+                  <button type="button" id="copy-tile-btn" disabled>Copy tile</button>
+                  <button type="button" id="paste-tile-btn" disabled>Paste tile</button>
+                </div>
+              </div>
+            </div>
+          </details>
+        </aside>
+
+        <aside class="atlas-panel pane" aria-label="Mini atlas navigation">
           <h2 class="atlas-title">Mini atlas</h2>
           <div class="atlas-wrapper">
             <div class="atlas-canvas-stack">
@@ -89,10 +158,6 @@
       </div>
     </section>
   </main>
-
-  <footer class="app-footer">
-    <small>Supports NES 2bpp and SNES 4bpp tile data. Use arrow keys to step tiles.</small>
-  </footer>
 
   <script type="module" src="./main.js"></script>
 </body>
