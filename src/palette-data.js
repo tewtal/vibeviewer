@@ -146,6 +146,35 @@ export const defaultPaletteSets = {
 export function normalizePaletteSet(format, palettes) {
   const config = getPaletteConfig(format);
   const defaults = defaultPaletteSets[format] ?? [];
+  
+  // If palettes is already an array with the correct length, try to reuse it
+  if (Array.isArray(palettes) && palettes.length === config.paletteCount) {
+    let needsNewArray = false;
+    
+    // Check if any palette needs to be modified
+    for (let paletteIndex = 0; paletteIndex < config.paletteCount; paletteIndex++) {
+      const palette = palettes[paletteIndex];
+      if (!Array.isArray(palette) || palette.length !== config.colorsPerPalette) {
+        needsNewArray = true;
+        break;
+      }
+    }
+    
+    // If all palettes are already the correct structure, normalize in-place
+    if (!needsNewArray) {
+      for (let paletteIndex = 0; paletteIndex < config.paletteCount; paletteIndex++) {
+        const palette = palettes[paletteIndex];
+        const fallback = defaults[paletteIndex] ?? defaults[0] ?? [];
+        for (let colorIndex = 0; colorIndex < config.colorsPerPalette; colorIndex++) {
+          const color = palette[colorIndex] ?? fallback[colorIndex] ?? "#000000";
+          palette[colorIndex] = normalizeHexColor(color);
+        }
+      }
+      return palettes;
+    }
+  }
+  
+  // Otherwise create a new array structure
   return Array.from({ length: config.paletteCount }, (_, paletteIndex) => {
     const palette = palettes?.[paletteIndex];
     const fallback = defaults[paletteIndex] ?? defaults[0] ?? [];
